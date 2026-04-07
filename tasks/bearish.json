@@ -1,0 +1,49 @@
+{
+  "task_name": "bearish",
+  "scenario_label": "bearish",
+  "difficulty": "medium",
+  "max_steps": 20,
+  "initial_capital": 9500,
+  "initial_cash": 5000,
+  "initial_holdings": 500,
+  "initial_price": 9.0,
+  "transaction_cost_rate": 0.001,
+  "sell_threshold": 0,
+  "price_series": [
+    9.0,
+    8.89,
+    8.79,
+    8.68,
+    8.58,
+    8.47,
+    8.37,
+    8.27,
+    8.17,
+    8.07,
+    7.98,
+    7.88,
+    7.79,
+    7.69,
+    7.6,
+    7.51,
+    7.42,
+    7.33,
+    7.24,
+    7.16,
+    7.07
+  ],
+  "success_criteria": {
+    "min_portfolio_value_pct": 0.95,
+    "min_portfolio_value": 9025,
+    "max_buys_after_step": {
+      "step": 5,
+      "max_buys": 0
+    },
+    "max_final_holdings": 100
+  },
+  "grader_weights": {
+    "portfolio_value": 0.5,
+    "no_buy_after_step5": 0.3,
+    "final_holdings": 0.2
+  }
+}

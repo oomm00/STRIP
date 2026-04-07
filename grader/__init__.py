@@ -1,0 +1,1 @@
+# STRIP — grader package

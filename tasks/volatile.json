@@ -1,0 +1,46 @@
+{
+  "task_name": "volatile",
+  "scenario_label": "volatile",
+  "difficulty": "hard",
+  "max_steps": 20,
+  "initial_capital": 10000,
+  "initial_cash": 5000,
+  "initial_holdings": 200,
+  "initial_price": 25.0,
+  "transaction_cost_rate": 0.001,
+  "sell_threshold": 0,
+  "price_series": [
+    25.0,
+    26.5,
+    25.17,
+    27.18,
+    25.28,
+    26.54,
+    24.42,
+    26.13,
+    24.56,
+    25.79,
+    23.98,
+    25.9,
+    24.6,
+    26.08,
+    23.99,
+    25.67,
+    24.39,
+    25.85,
+    24.04,
+    25.96,
+    24.4
+  ],
+  "success_criteria": {
+    "min_portfolio_value_pct": 0.9,
+    "min_portfolio_value": 9000,
+    "max_drawdown": 0.15,
+    "max_trades": 6
+  },
+  "grader_weights": {
+    "portfolio_value": 0.4,
+    "max_drawdown": 0.4,
+    "trade_count": 0.2
+  }
+}

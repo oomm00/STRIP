@@ -1,0 +1,30 @@
+name: strip
+version: "1.0.0"
+description: >
+  Offline financial advisory decision environment. An AI agent reads a structured
+  market brief and analyst note, then recommends portfolio actions (BUY / SELL / HOLD)
+  across deterministic market scenarios. Part of the STRIP (Systematic Trading
+  Reasoning Intelligence Platform) project.
+tasks:
+  - name: bullish
+    difficulty: easy
+  - name: bullish_trap
+    difficulty: easy_hard
+  - name: bearish
+    difficulty: medium
+  - name: bearish_bounce
+    difficulty: medium_hard
+  - name: volatile
+    difficulty: hard
+  - name: volatile_crash
+    difficulty: hard
+  - name: sideways
+    difficulty: easy_medium
+  - name: sideways_whipsaw
+    difficulty: medium
+observation_type: TradeObservation
+action_type: TradeAction
+state_type: dict
+reward_range: [0.0, 1.0]
+episode_length: 20
+offline: true

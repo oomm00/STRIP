@@ -1,0 +1,44 @@
+{
+  "task_name": "sideways",
+  "scenario_label": "sideways",
+  "difficulty": "easy_medium",
+  "max_steps": 20,
+  "initial_capital": 10000,
+  "initial_cash": 10000,
+  "initial_holdings": 0,
+  "initial_price": 100.0,
+  "transaction_cost_rate": 0.001,
+  "sell_threshold": 0,
+  "price_series": [
+    100.0,
+    100.8,
+    99.79,
+    100.69,
+    99.99,
+    100.99,
+    100.18,
+    100.78,
+    99.77,
+    100.67,
+    99.97,
+    100.77,
+    99.86,
+    100.86,
+    100.25,
+    100.95,
+    99.94,
+    100.74,
+    99.83,
+    100.53,
+    99.73
+  ],
+  "success_criteria": {
+    "min_portfolio_value_pct": 0.98,
+    "min_portfolio_value": 9800,
+    "max_trades": 3
+  },
+  "grader_weights": {
+    "portfolio_value": 0.6,
+    "trade_count": 0.4
+  }
+}

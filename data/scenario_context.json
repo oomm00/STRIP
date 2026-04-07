@@ -1,0 +1,44 @@
+{
+  "scenarios": {
+    "bullish": {
+      "trend": "upward",
+      "volatility": "low",
+      "description": "Steady growth with minimal price fluctuation, approximately +1.5% per step"
+    },
+    "bearish": {
+      "trend": "downward",
+      "volatility": "low",
+      "description": "Consistent decline of approximately -1.2% per step"
+    },
+    "volatile": {
+      "trend": "mixed",
+      "volatility": "high",
+      "description": "Large alternating swings of ±5% to ±8% per step"
+    },
+    "sideways": {
+      "trend": "flat",
+      "volatility": "low",
+      "description": "Small oscillations of ±1% around a base price, no clear trend"
+    },
+    "bullish_trap": {
+      "trend": "upward_reversal",
+      "volatility": "medium",
+      "description": "Uptrend for 12 steps followed by a sharp -10% drop, testing overconfidence"
+    },
+    "bearish_bounce": {
+      "trend": "downward_spike",
+      "volatility": "medium",
+      "description": "Steady decline with a false +5% reversal at step 8 (dead cat bounce)"
+    },
+    "volatile_crash": {
+      "trend": "mixed_crash",
+      "volatility": "extreme",
+      "description": "Volatile market with a single -20% flash crash at step 7"
+    },
+    "sideways_whipsaw": {
+      "trend": "flat_noisy",
+      "volatility": "medium",
+      "description": "Flat market with oscillations increasing to ±3% during steps 10-15"
+    }
+  }
+}

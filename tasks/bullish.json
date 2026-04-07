@@ -1,0 +1,46 @@
+{
+  "task_name": "bullish",
+  "scenario_label": "bullish",
+  "difficulty": "easy",
+  "max_steps": 20,
+  "initial_capital": 10000,
+  "initial_cash": 10000,
+  "initial_holdings": 0,
+  "initial_price": 100.0,
+  "transaction_cost_rate": 0.001,
+  "sell_threshold": 10,
+  "price_series": [
+    100.0,
+    101.5,
+    103.02,
+    104.57,
+    106.14,
+    107.73,
+    109.34,
+    110.98,
+    112.65,
+    114.34,
+    116.05,
+    117.79,
+    119.56,
+    121.36,
+    123.18,
+    125.02,
+    126.9,
+    128.8,
+    130.73,
+    132.7,
+    134.69
+  ],
+  "success_criteria": {
+    "min_portfolio_value_pct": 1.15,
+    "min_portfolio_value": 11500,
+    "max_trades": 5,
+    "no_sell_before_step": 10
+  },
+  "grader_weights": {
+    "portfolio_value": 0.5,
+    "trade_count": 0.3,
+    "no_early_sell": 0.2
+  }
+}
