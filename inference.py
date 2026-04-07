@@ -21,6 +21,7 @@ HF_TOKEN = os.getenv("HF_TOKEN", "")
 client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
 TASKS = ["bullish", "bearish", "volatile", "sideways"]
+API_FAILED = False
 
 
 def build_prompt(obs) -> str:
@@ -53,10 +54,11 @@ def run_task(task_name: str):
 
     step, rewards, done, score = 0, [], False, 0.0
 
+    global API_FAILED
     try:
         while not done:
             action = None
-            if HF_TOKEN:
+            if HF_TOKEN and not API_FAILED:
                 for attempt in range(2):
                     try:
                         response = client.chat.completions.create(
@@ -73,7 +75,8 @@ def run_task(task_name: str):
                         if "429" in error_msg and "insufficient_quota" not in error_msg:
                             time.sleep(2)
                         else:
-                            break  # Abort API and fallback to rule-based
+                            API_FAILED = True
+                            break  # Abort API globally and fallback to rule-based
                             
             if action is None:
                 action = choose_action(obs)
