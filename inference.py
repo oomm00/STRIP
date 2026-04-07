@@ -1,24 +1,17 @@
 """
-STRIP — LLM Inference Script
-
-MANDATORY for submission. Uses the OpenAI client to run an LLM agent
-through all tasks and emits structured stdout in the required format.
-
-Environment variables:
-    API_BASE_URL  — OpenAI-compatible API endpoint
-    MODEL_NAME    — model identifier
-    HF_TOKEN      — API key
-
-Stdout format:
-    [START] task=<task_name> env=strip model=<model_name>
-    [STEP]  step=<n> action=<action> reward=<0.00> done=<true|false> error=<msg|null>
-    [END]   success=<true|false> steps=<n> score=<0.00> rewards=<r1,r2,...,rn>
+STRIP — LLM Inference Script (FIXED VERSION)
 """
 
 import os
+import time
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from openai import OpenAI
 from env.environment import STRIPEnv
 from env.models import TradeAction
+from agents.trader import choose_action
 
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
@@ -27,12 +20,10 @@ HF_TOKEN = os.getenv("HF_TOKEN", "")
 
 client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
-# Minimum 3 required tasks for submission
 TASKS = ["bullish", "bearish", "volatile", "sideways"]
 
 
 def build_prompt(obs) -> str:
-    """Build the LLM prompt from the current observation."""
     return (
         f"You are a financial advisor. Here is the current market state:\n\n"
         f"Scenario: {obs.scenario_label}\n"
@@ -46,16 +37,16 @@ def build_prompt(obs) -> str:
 
 
 def parse_action(text: str) -> TradeAction:
-    """Parse LLM response into a TradeAction, defaulting to HOLD."""
+    if not text:
+        return TradeAction.HOLD
     text = text.strip().upper()
     for action in TradeAction:
         if action.value in text:
             return action
-    return TradeAction.HOLD  # default fallback
+    return TradeAction.HOLD
 
 
 def run_task(task_name: str):
-    """Run a single task episode using the LLM agent."""
     env = STRIPEnv()
     obs = env.reset(task=task_name)
     print(f"[START] task={task_name} env=strip model={MODEL_NAME}")
@@ -64,15 +55,12 @@ def run_task(task_name: str):
 
     try:
         while not done:
-            response = client.chat.completions.create(
-                model=MODEL_NAME,
-                messages=[{"role": "user", "content": build_prompt(obs)}],
-                max_tokens=10,
-            )
-            action = parse_action(response.choices[0].message.content)
+            action = choose_action(obs)
+
             obs, reward, done = env.step(action)
             rewards.append(reward)
             step += 1
+
             print(
                 f"[STEP] step={step} action={action.value} "
                 f"reward={reward:.2f} done={str(done).lower()} error=null"
