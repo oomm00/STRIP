@@ -4,9 +4,6 @@ STRIP — LLM Inference Script (FIXED VERSION)
 
 import os
 import time
-from dotenv import load_dotenv
-
-load_dotenv()
 
 from openai import OpenAI
 from env.environment import STRIPEnv
