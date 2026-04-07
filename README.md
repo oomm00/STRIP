@@ -11,6 +11,11 @@ short_description: 'short_description: AI agent for financial trading decisions'
 ---
 # STRIP — Systematic Trading Reasoning Intelligence Platform
 
+## Live Demo
+
+- API Docs: https://oomm00-strip.hf.space/docs
+- Health Check: https://oomm00-strip.hf.space/health
+
 > An offline, OpenEnv-compliant environment where an AI agent acts as a financial advisor:
 > reading a market brief, interpreting an analyst's reasoning, and recommending portfolio actions
 > (BUY / SELL / HOLD) across deterministic market scenarios — exactly the decision loop a human

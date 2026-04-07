@@ -53,6 +53,11 @@ class StateResponse(BaseModel):
 
 # --- Endpoints ---
 
+@app.get("/")
+def root():
+    return {"message": "STRIP API is running. Go to /docs"}
+
+
 @app.get("/health")
 def health():
     """Health check — must return 200."""
