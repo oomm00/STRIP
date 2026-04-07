@@ -15,7 +15,9 @@ API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+client = None
+if HF_TOKEN:
+    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
 
 TASKS = ["bullish", "bearish", "volatile", "sideways"]
 API_FAILED = False
@@ -55,7 +57,7 @@ def run_task(task_name: str):
     try:
         while not done:
             action = None
-            if HF_TOKEN and not API_FAILED:
+            if client and not API_FAILED:
                 for attempt in range(2):
                     try:
                         response = client.chat.completions.create(
