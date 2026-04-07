@@ -1,3 +1,14 @@
+---
+title: STRIP
+emoji: 🚀
+colorFrom: blue
+colorTo: purple
+sdk: docker
+app_file: app.py
+pinned: false
+license: mit
+short_description: 'short_description: AI agent for financial trading decisions'
+---
 # STRIP — Systematic Trading Reasoning Intelligence Platform
 
 > An offline, OpenEnv-compliant environment where an AI agent acts as a financial advisor:
