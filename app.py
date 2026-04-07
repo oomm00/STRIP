@@ -65,10 +65,14 @@ def health():
 
 
 @app.post("/reset")
-def reset(request: ResetRequest):
+def reset(request: ResetRequest = None):
     """Start new episode, returns initial TradeObservation."""
+    task = "bullish"
+    if request and hasattr(request, "task"):
+        task = request.task
+
     try:
-        obs = env.reset(task=request.task)
+        obs = env.reset(task=task)
         return obs.model_dump()
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
