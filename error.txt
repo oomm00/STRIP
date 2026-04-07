@@ -1,0 +1,14 @@
+Using CPython 3.11.9 interpreter at: C:\Users\omsat\AppData\Local\Microsoft\WindowsApps\PythonSoftwareFoundation.Python.3.11_qbz5n2kfra8p0\python.exe
+warning: No `requires-python` value found in the workspace. Defaulting to `>=3.11`.
+  ├ù No solution found
+  Γöé when resolving
+  Γöé dependencies:
+  Γò░ΓöÇΓû╢ Because only
+      openenv<=0.1.13 is
+      available and your
+      project depends on
+      openenv>=0.2.0, we
+      can conclude that
+      your project's
+      requirements are
+      unsatisfiable.
