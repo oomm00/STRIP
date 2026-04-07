@@ -55,7 +55,28 @@ def run_task(task_name: str):
 
     try:
         while not done:
-            action = choose_action(obs)
+            action = None
+            if HF_TOKEN:
+                for attempt in range(2):
+                    try:
+                        response = client.chat.completions.create(
+                            model=MODEL_NAME,
+                            messages=[{"role": "user", "content": build_prompt(obs)}],
+                            max_tokens=10,
+                            timeout=10
+                        )
+                        action = parse_action(response.choices[0].message.content)
+                        break
+                    except Exception as e:
+                        error_msg = str(e).lower()
+                        # Retry only on generic rate limits, not billing issues
+                        if "429" in error_msg and "insufficient_quota" not in error_msg:
+                            time.sleep(2)
+                        else:
+                            break  # Abort API and fallback to rule-based
+                            
+            if action is None:
+                action = choose_action(obs)
 
             obs, reward, done = env.step(action)
             rewards.append(reward)
