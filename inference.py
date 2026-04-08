@@ -92,7 +92,8 @@ def run_task(task_name: str):
         score = env.compute_final_score()
 
     except Exception as e:
-        score = 0.0
+        # Use minimum valid score (strictly > 0)
+        score = 0.001
         print(
             f"[STEP] step={step + 1} action=HOLD "
             f"reward=0.00 done=true error={str(e)}", flush=True
