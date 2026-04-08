@@ -10,6 +10,8 @@ All constants are fixed across tasks:
   gamma = 2.0  (early exit penalty weight)
 """
 
+import math
+
 from env.models import TradeAction, TradeReward
 
 
@@ -28,12 +30,15 @@ def normalize_reward(raw_reward: float, initial_capital: float) -> float:
 
     Clips to [-scale, +scale] then linearly maps to (0, 1).
     """
-    scale = initial_capital * 0.05  # per-step scale = 5% of capital
-    clipped = max(-scale, min(scale, raw_reward))
+    scale = float(initial_capital) * 0.05  # per-step scale = 5% of capital
+    if not math.isfinite(scale) or scale <= 0:
+        # Fallback to neutral valid score if config is invalid.
+        return 0.50
+
+    clipped = max(-scale, min(scale, float(raw_reward)))
     norm = (clipped + scale) / (2 * scale)
-    
-    # Map [0, 1] to [0.001, 0.999] for strictly (0, 1) range
-    return 0.001 + (norm * 0.998)
+    strict = 0.01 + (norm * 0.98)
+    return max(0.01, min(0.99, strict))
 
 
 def compute_reward(

@@ -7,6 +7,49 @@ All graders return a float in (0.0, 1.0).
 Grading is purely deterministic — same trajectory always produces same score.
 """
 
+import math
+import numbers
+
+
+STRICT_MIN_SCORE = 0.01
+STRICT_MAX_SCORE = 0.99
+DEFAULT_SAFE_SCORE = 0.50
+
+
+def _safe_number(value, default: float) -> float:
+    """Return a finite float; reject bool/None/non-numeric/nan/inf."""
+    if value is None or isinstance(value, bool):
+        return default
+    if isinstance(value, numbers.Real):
+        numeric = float(value)
+    else:
+        try:
+            numeric = float(value)
+        except (TypeError, ValueError):
+            return default
+    if not math.isfinite(numeric):
+        return default
+    return numeric
+
+
+def _safe_bool(value, default: bool = False) -> bool:
+    if isinstance(value, bool):
+        return value
+    if value in (0, 1):
+        return bool(value)
+    return default
+
+
+def _sanitize_score_strict(raw_score, default: float = DEFAULT_SAFE_SCORE) -> float:
+    """
+    Guarantee a finite float strictly in (0,1), even for None/bool/int/nan/inf.
+    """
+    numeric = _safe_number(raw_score, default)
+    bounded = max(0.0, min(1.0, numeric))
+    strict_score = STRICT_MIN_SCORE + (bounded * (STRICT_MAX_SCORE - STRICT_MIN_SCORE))
+    strict_score = max(STRICT_MIN_SCORE, min(STRICT_MAX_SCORE, strict_score))
+    return float(round(strict_score, 6))
+
 
 def grade(task_name: str, trajectory: dict, task_config: dict) -> float:
     """
@@ -44,15 +87,7 @@ def grade(task_name: str, trajectory: dict, task_config: dict) -> float:
         raise ValueError(f"No grader registered for task: {task_name}")
 
     raw_score = grader_fn(trajectory, task_config)
-    
-    # Ensure score is strictly between 0 and 1 (not 0.0, not 1.0)
-    # Clamp raw_score to [0, 1] first, then map to (0.001, 0.999)
-    raw_score = max(0.0, min(1.0, raw_score))
-    final_score = 0.001 + (raw_score * 0.998)
-    
-    # Extra safety: clamp to strict bounds
-    final_score = max(0.001, min(0.999, final_score))
-    return round(final_score, 4)
+    return _sanitize_score_strict(raw_score)
 
 
 def _grade_bullish(trajectory: dict, config: dict) -> float:
@@ -65,15 +100,20 @@ def _grade_bullish(trajectory: dict, config: dict) -> float:
         +0.2  if no SELL before sell_threshold step
     """
     score = 0.0
-    criteria = config["success_criteria"]
+    criteria = config.get("success_criteria", {})
+    final_portfolio_value = _safe_number(trajectory.get("final_portfolio_value"), 0.0)
+    trade_count = _safe_number(trajectory.get("trade_count"), float("inf"))
+    sell_before_threshold = _safe_bool(trajectory.get("sell_before_threshold"), default=True)
+    min_portfolio_value = _safe_number(criteria.get("min_portfolio_value"), float("inf"))
+    max_trades = _safe_number(criteria.get("max_trades"), float("inf"))
 
-    if trajectory["final_portfolio_value"] >= criteria["min_portfolio_value"]:
+    if final_portfolio_value >= min_portfolio_value:
         score += 0.5
 
-    if trajectory["trade_count"] <= criteria["max_trades"]:
+    if trade_count <= max_trades:
         score += 0.3
 
-    if not trajectory["sell_before_threshold"]:
+    if not sell_before_threshold:
         score += 0.2
 
     return round(score, 2)
@@ -89,16 +129,20 @@ def _grade_bearish(trajectory: dict, config: dict) -> float:
         +0.2  if final holdings <= max_final_holdings
     """
     score = 0.0
-    criteria = config["success_criteria"]
+    criteria = config.get("success_criteria", {})
+    final_portfolio_value = _safe_number(trajectory.get("final_portfolio_value"), 0.0)
+    buy_actions_after_step = _safe_number(trajectory.get("buy_actions_after_step"), float("inf"))
+    final_holdings = _safe_number(trajectory.get("final_holdings"), float("inf"))
+    min_portfolio_value = _safe_number(criteria.get("min_portfolio_value"), float("inf"))
+    max_holdings = _safe_number(criteria.get("max_final_holdings"), float("inf"))
 
-    if trajectory["final_portfolio_value"] >= criteria["min_portfolio_value"]:
+    if final_portfolio_value >= min_portfolio_value:
         score += 0.5
 
-    if trajectory["buy_actions_after_step"] <= 0:
+    if buy_actions_after_step <= 0:
         score += 0.3
 
-    max_holdings = criteria.get("max_final_holdings", float("inf"))
-    if trajectory["final_holdings"] <= max_holdings:
+    if final_holdings <= max_holdings:
         score += 0.2
 
     return round(score, 2)
@@ -114,17 +158,21 @@ def _grade_volatile(trajectory: dict, config: dict) -> float:
         +0.2  if trade_count <= max_trades
     """
     score = 0.0
-    criteria = config["success_criteria"]
+    criteria = config.get("success_criteria", {})
+    final_portfolio_value = _safe_number(trajectory.get("final_portfolio_value"), 0.0)
+    max_drawdown = _safe_number(trajectory.get("max_drawdown"), float("inf"))
+    trade_count = _safe_number(trajectory.get("trade_count"), float("inf"))
+    min_portfolio_value = _safe_number(criteria.get("min_portfolio_value"), float("inf"))
+    max_dd = _safe_number(criteria.get("max_drawdown", 1.0), 1.0)
+    max_trades = _safe_number(criteria.get("max_trades"), float("inf"))
 
-    if trajectory["final_portfolio_value"] >= criteria["min_portfolio_value"]:
+    if final_portfolio_value >= min_portfolio_value:
         score += 0.4
 
-    max_dd = criteria.get("max_drawdown", 1.0)
-    if trajectory["max_drawdown"] <= max_dd:
+    if max_drawdown <= max_dd:
         score += 0.4
 
-    max_trades = criteria.get("max_trades", float("inf"))
-    if trajectory["trade_count"] <= max_trades:
+    if trade_count <= max_trades:
         score += 0.2
 
     return round(score, 2)
@@ -139,13 +187,16 @@ def _grade_sideways(trajectory: dict, config: dict) -> float:
         +0.4  if trade_count <= max_trades
     """
     score = 0.0
-    criteria = config["success_criteria"]
+    criteria = config.get("success_criteria", {})
+    final_portfolio_value = _safe_number(trajectory.get("final_portfolio_value"), 0.0)
+    trade_count = _safe_number(trajectory.get("trade_count"), float("inf"))
+    min_portfolio_value = _safe_number(criteria.get("min_portfolio_value"), float("inf"))
+    max_trades = _safe_number(criteria.get("max_trades"), float("inf"))
 
-    if trajectory["final_portfolio_value"] >= criteria["min_portfolio_value"]:
+    if final_portfolio_value >= min_portfolio_value:
         score += 0.6
 
-    max_trades = criteria.get("max_trades", float("inf"))
-    if trajectory["trade_count"] <= max_trades:
+    if trade_count <= max_trades:
         score += 0.4
 
     return round(score, 2)
