@@ -462,7 +462,7 @@ class STRIPEnv:
         3. Build TradeObservation (note included)
         4. Compute reward (raw + normalized)
         5. Check termination
-        Returns: (observation, normalized_reward, done)
+        Returns: (observation, normalized_reward, done, info)
         """
 
     def state(self) -> dict:
@@ -610,7 +610,7 @@ Available endpoints:
 - `GET  /health`  — server status (must return 200)
 - `GET  /docs`    — auto-generated OpenAPI documentation
 - `POST /reset`   — start new episode, returns initial TradeObservation
-- `POST /step`    — submit TradeAction, returns (TradeObservation, reward, done)
+- `POST /step`    — submit TradeAction, returns (TradeObservation, reward, done, info)
 - `GET  /state`   — returns current state dict without advancing the episode
 
 ### Docker
@@ -648,7 +648,7 @@ Set environment variables:
 ```bash
 export API_BASE_URL="https://api.openai.com/v1"
 export MODEL_NAME="gpt-4o-mini"
-export HF_TOKEN="your-api-key"
+export OPENAI_API_KEY="your-api-key"
 ```
 
 Run:
@@ -705,9 +705,11 @@ from env.models import TradeAction
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME   = os.getenv("MODEL_NAME", "gpt-4o-mini")
-HF_TOKEN     = os.getenv("HF_TOKEN", "")
+API_KEY      = os.getenv("OPENAI_API_KEY") or os.getenv("HF_TOKEN")
 
-client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+client = None
+if API_KEY:
+    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 TASKS  = ["bullish", "bearish", "volatile", "sideways"]
 
 def build_prompt(obs) -> str:
@@ -744,7 +746,7 @@ def run_task(task_name: str):
                 max_tokens=10,
             )
             action = parse_action(response.choices[0].message.content)
-            obs, reward, done = env.step(action)
+            obs, reward, done, info = env.step(action)
             rewards.append(reward)
             step += 1
             print(

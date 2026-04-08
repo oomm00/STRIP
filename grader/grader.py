@@ -2,7 +2,7 @@
 STRIP — Grading System
 
 Per-task graders that evaluate a completed episode trajectory.
-All graders return a float in [0.0, 1.0].
+All graders return a float in (0.0, 1.0).
 
 Grading is purely deterministic — same trajectory always produces same score.
 """
@@ -26,7 +26,7 @@ def grade(task_name: str, trajectory: dict, task_config: dict) -> float:
         task_config: The loaded task JSON config.
 
     Returns:
-        Score in [0.0, 1.0].
+        Score in (0.0, 1.0).
     """
     graders = {
         "bullish": _grade_bullish,
@@ -43,7 +43,11 @@ def grade(task_name: str, trajectory: dict, task_config: dict) -> float:
     if grader_fn is None:
         raise ValueError(f"No grader registered for task: {task_name}")
 
-    return grader_fn(trajectory, task_config)
+    raw_score = grader_fn(trajectory, task_config)
+    
+    # Ensure score is strictly between 0 and 1
+    # mapping [0, 1] to [0.001, 0.999]
+    return round(0.001 + (raw_score * 0.998), 4)
 
 
 def _grade_bullish(trajectory: dict, config: dict) -> float:

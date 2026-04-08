@@ -39,6 +39,7 @@ class StepResponse(BaseModel):
     observation: dict
     reward: float
     done: bool
+    info: dict
 
 
 class StateResponse(BaseModel):
@@ -82,7 +83,7 @@ def reset(request: ResetRequest = None):
 
 @app.post("/step")
 def step(request: StepRequest):
-    """Submit TradeAction, returns (TradeObservation, reward, done)."""
+    """Submit TradeAction, returns (TradeObservation, reward, done, info)."""
     try:
         action = TradeAction(request.action.upper())
     except ValueError:
@@ -92,11 +93,12 @@ def step(request: StepRequest):
         )
 
     try:
-        obs, reward, done = env.step(action)
+        obs, reward, done, info = env.step(action)
         return StepResponse(
             observation=obs.model_dump(),
             reward=round(reward, 4),
             done=done,
+            info=info,
         ).model_dump()
     except RuntimeError as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -135,7 +135,7 @@ class STRIPEnv:
             action: TradeAction (BUY, SELL, HOLD)
 
         Returns:
-            Tuple of (observation, normalized_reward, done)
+            Tuple of (observation, normalized_reward, done, info)
         """
         if self.done:
             raise RuntimeError("Episode already terminated. Call reset() first.")
@@ -222,7 +222,7 @@ class STRIPEnv:
         # --- Build observation ---
         obs = self._build_observation()
 
-        return obs, reward.normalized_reward, self.done
+        return obs, reward.normalized_reward, self.done, {}
 
     def state(self) -> dict:
         """Return current state snapshot — callable independently of step()."""

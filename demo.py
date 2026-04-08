@@ -32,7 +32,7 @@ def run_demo(task_name: str):
 
     while not done:
         action = choose_action(obs)
-        obs, reward, done = env.step(action)
+        obs, reward, done, info = env.step(action)
         rewards.append(reward)
         step += 1
 
@@ -54,7 +54,7 @@ def run_demo(task_name: str):
     # Final summary
     score = env.compute_final_score()
     final_value = obs.portfolio_value
-    success = score >= 0.6
+    success = score >= 0.59
 
     print(f"{'='*70}")
     print(

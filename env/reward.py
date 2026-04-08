@@ -21,19 +21,19 @@ GAMMA = 2.0   # early exit penalty weight
 
 def normalize_reward(raw_reward: float, initial_capital: float) -> float:
     """
-    Normalise a raw reward into the [0.0, 1.0] range.
+    Normalise a raw reward into the (0.0, 1.0) range.
 
     Uses a per-step scale (5% of initial capital) to ensure step-level
     reward variations are meaningful, not crushed near 0.5.
 
-    Clips to [-scale, +scale] then linearly maps:
-        -scale → 0.0
-        0      → 0.5
-        +scale → 1.0
+    Clips to [-scale, +scale] then linearly maps to (0, 1).
     """
     scale = initial_capital * 0.05  # per-step scale = 5% of capital
     clipped = max(-scale, min(scale, raw_reward))
-    return (clipped + scale) / (2 * scale)
+    norm = (clipped + scale) / (2 * scale)
+    
+    # Map [0, 1] to [0.001, 0.999] for strictly (0, 1) range
+    return 0.001 + (norm * 0.998)
 
 
 def compute_reward(

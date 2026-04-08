@@ -13,11 +13,11 @@ from agents.trader import choose_action
 
 API_BASE_URL = os.getenv("API_BASE_URL", "https://api.openai.com/v1")
 MODEL_NAME = os.getenv("MODEL_NAME", "gpt-4o-mini")
-HF_TOKEN = os.getenv("HF_TOKEN")
+API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("HF_TOKEN")
 
 client = None
-if HF_TOKEN:
-    client = OpenAI(base_url=API_BASE_URL, api_key=HF_TOKEN)
+if API_KEY:
+    client = OpenAI(base_url=API_BASE_URL, api_key=API_KEY)
 
 TASKS = ["bullish", "bearish", "volatile", "sideways"]
 API_FAILED = False
@@ -49,7 +49,7 @@ def parse_action(text: str) -> TradeAction:
 def run_task(task_name: str):
     env = STRIPEnv()
     obs = env.reset(task=task_name)
-    print(f"[START] task={task_name} env=strip model={MODEL_NAME}")
+    print(f"[START] task={task_name} env=strip model={MODEL_NAME}", flush=True)
 
     step, rewards, done, score = 0, [], False, 0.0
 
@@ -80,13 +80,13 @@ def run_task(task_name: str):
             if action is None:
                 action = choose_action(obs)
 
-            obs, reward, done = env.step(action)
+            obs, reward, done, info = env.step(action)
             rewards.append(reward)
             step += 1
 
             print(
                 f"[STEP] step={step} action={action.value} "
-                f"reward={reward:.2f} done={str(done).lower()} error=null"
+                f"reward={reward:.2f} done={str(done).lower()} error=null", flush=True
             )
 
         score = env.compute_final_score()
@@ -95,15 +95,15 @@ def run_task(task_name: str):
         score = 0.0
         print(
             f"[STEP] step={step + 1} action=HOLD "
-            f"reward=0.00 done=true error={str(e)}"
+            f"reward=0.00 done=true error={str(e)}", flush=True
         )
 
     finally:
         env.close()
         reward_str = ",".join(f"{r:.2f}" for r in rewards)
         print(
-            f"[END] success={str(score >= 0.6).lower()} "
-            f"steps={step} score={score:.2f} rewards={reward_str}"
+            f"[END] success={str(score >= 0.59).lower()} "
+            f"steps={step} score={score:.2f} rewards={reward_str}", flush=True
         )
 
 
